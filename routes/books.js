@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const ExpressError = require("../expressError");
 const Book = require("../models/book");
-const jsonschema = require("jsonschema"); 
+const jsonschema = require("jsonschema");
 const bookSchema = require("../schemas/book.json")
 
 
@@ -35,14 +35,15 @@ router.get("/:id", async function (req, res, next) {
 router.post("/", async function (req, res, next) {
   try {
     //validates if req.body follows schema rules
+
     const result = jsonschema.validate(req.body, bookSchema);
-    console.log(result)
+
     //if so continue on with code 
     if (result.valid) {
       const book = await Book.create(req.body);
       return res.status(201).json({ book });
     } else {
-       const listOfErrors = result.errors.map(e => e.stack);
+      const listOfErrors = result.errors.map(e => e.stack);
       const err = new ExpressError(listOfErrors, 400);
       return next(err);
     }
@@ -56,16 +57,18 @@ router.post("/", async function (req, res, next) {
 
 router.put("/:isbn", async function (req, res, next) {
   try {
+    console.log(req.body)
     const result = jsonschema.validate(res.body, bookSchema);
+    console.log("@@@@@@@@@@@@@@@", result.valid)
     if (result.valid) {
       const book = await Book.update(req.params.isbn, req.body);
       return res.json({ book });
     } else {
-      const listOfErrors = result.errors.map( e => e.stack);
+      const listOfErrors = result.errors.map(e => e.stack);
       const err = new ExpressError(listOfErrors, 400);
       return next(err);
     }
-   
+
   } catch (err) {
     return next(err);
   }

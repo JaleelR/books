@@ -62,7 +62,8 @@ class Book {
    * */
 
   static async create(data) {
-    const result = await db.query(
+    try {
+       const result = await db.query(
       `INSERT INTO books (
             isbn,
             amazon_url,
@@ -92,8 +93,19 @@ class Book {
         data.year
       ]
     );
+return result.rows[0];
+    } catch (e) {
+      
+    if (e.code === "23505") {
+      const err = new Error(`isbn ${data.isbn} is already Taken!`);
+      err.statusCode = 400;
+      throw err;
+    }
+    }
+   
+  
 
-    return result.rows[0];
+    
   }
 
   /** Update data with matching ID to data, return updated book.
@@ -138,7 +150,7 @@ class Book {
     if (result.rows.length === 0) {
       throw { message: `There is no book with an isbn '${isbn}`, status: 404 }
     }
-
+    
     return result.rows[0];
   }
 
